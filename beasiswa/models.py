@@ -8,6 +8,7 @@ class Scholarship(models.Model):
     end_date = models.DateField(null=True, blank=True)
     provider = models.CharField(max_length=255, null=True, blank=True)
     benefit = models.CharField(max_length=255)
+    link = models.CharField(max_length=255, null=True, blank=True)  # New field added
 
     class Meta:
         managed = False
