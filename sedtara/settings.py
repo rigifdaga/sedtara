@@ -147,4 +147,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Alternatively, during development only, allow all origins:
-# CORS_ALLOW_ALL_ORIGINS = True  # Use with caution in production
+# CORS_ALLOW_ALL_ORIGINS = True  # Use with caution 
+
+# JWT Settings
+JWT_SECRET_KEY = env('JWT_SECRET_KEY')
