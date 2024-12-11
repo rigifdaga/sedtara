@@ -1,6 +1,9 @@
 from django.http import JsonResponse
 from .models import Course, Module
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
+import json
 
 def get_all_courses(request):
     courses = Course.objects.select_related('teacher').order_by('-course_id')
@@ -55,3 +58,80 @@ def get_module_by_id(request, course_id, module_id):
         })
     
     return JsonResponse(module_data)
+
+@require_http_methods(["POST"])
+def create_module(request, course_id):
+    try:
+        data = json.loads(request.body)
+
+        module_name = data.get('module_name')
+
+        if not course_id or not module_name:
+            return JsonResponse({"error": "course_id and module_name are required"}, status=400)
+
+        course = Course.objects.filter(course_id=course_id).first()
+        if not course:
+            return JsonResponse({"error": "Course not found"}, status=404)
+
+        new_module = Module(course=course, module_name=module_name)
+        new_module.save()
+
+        module_data = {
+            'module_id': new_module.module_id,
+            'module_name': new_module.module_name,
+            'course_id': new_module.course.course_id,
+        }
+
+        return JsonResponse(module_data, status=201)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@require_http_methods(["PUT"])
+def update_module(request, course_id, module_id):
+    try:
+        data = json.loads(request.body)
+        module_name = data.get('module_name')
+
+        if not module_name:
+            return JsonResponse({"error": "module_name is required"}, status=400)
+
+        course = Course.objects.filter(course_id=course_id).first()
+        if not course:
+            return JsonResponse({"error": "Course not found"}, status=404)
+
+        module = Module.objects.filter(course=course, module_id=module_id).first()
+        if not module:
+            return JsonResponse({"error": "Module not found"}, status=404)
+
+        module.module_name = module_name
+        module.save()
+
+        module_data = {
+            'module_id': module.module_id,
+            'module_name': module.module_name,
+            'course_id': module.course.course_id,
+        }
+
+        return JsonResponse(module_data, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+@require_http_methods(["DELETE"])
+def delete_module(request, course_id, module_id):
+    try:
+        course = Course.objects.filter(course_id=course_id).first()
+        if not course:
+            return JsonResponse({"error": "Course not found"}, status=404)
+
+        module = Module.objects.filter(course=course, module_id=module_id).first()
+        if not module:
+            return JsonResponse({"error": "Module not found"}, status=404)
+
+        module.delete()
+
+        return JsonResponse({"message": "Module deleted successfully"}, status=204)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

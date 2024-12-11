@@ -14,7 +14,7 @@ class Course(models.Model):
         db_table = 'course'
 
 class CourseStudent(models.Model):
-    course = models.OneToOneField(Course, models.DO_NOTHING, primary_key=True)  # The composite primary key (course_id, student_id) found, that is not supported. The first column is selected.
+    course = models.OneToOneField(Course, models.DO_NOTHING, primary_key=True)
     student = models.ForeignKey('users.StudentDetails', models.DO_NOTHING)
 
     class Meta:

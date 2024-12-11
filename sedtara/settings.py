@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -142,5 +142,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",  # Alternate localhost
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+]
+
 # Alternatively, during development only, allow all origins:
-CORS_ALLOW_ALL_ORIGINS = True  # Use with caution in production
+# CORS_ALLOW_ALL_ORIGINS = True  # Use with caution in production
