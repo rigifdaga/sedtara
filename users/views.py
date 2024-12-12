@@ -20,26 +20,26 @@ def register(request):
         email = data.get('email')
         password = data.get('password')
 
-        if not username or not email or not password:
-            return JsonResponse({"error": "All fields are required"}, status=400)
+        if not username or not email or not password or not full_name:
+            return JsonResponse({"error": "Username, email, password, dan full_name diperlukan."}, status=400)
         
         if not re.match(r'^[\w]+$', username):
-            return JsonResponse({"error": "Username must be alphanumeric and can only contain underscores."}, status=400)
+            return JsonResponse({"error": "Username harus hanya terdiri dari karakter alfanumerik dan/atau garis bawah."}, status=400)
 
         try:
             validate_email(email)
         except ValidationError:
-            return JsonResponse({"error": "Invalid email format."}, status=400)
+            return JsonResponse({"error": "Format email tidak valid."}, status=400)
 
         password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
         if not re.match(password_regex, password):
-            return JsonResponse({"error": "Password must be at least 8 characters long and contain a letter, a number, an uppercase letter, a lowercase letter, and a symbol."}, status=400)
+            return JsonResponse({"error": "Password setidaknya harus memiliki panjang 8 karakter, huruf besar dan kecil, angka, dan simbol."}, status=400)
 
         if Users.objects.filter(username=username).exists():
-            return JsonResponse({"error": "Username already exists"}, status=400)
+            return JsonResponse({"error": "Username sudah terdaftar."}, status=400)
 
         if Users.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email already exists"}, status=400)
+            return JsonResponse({"error": "Email sudah terdaftar."}, status=400)
 
         user = Users(
             username=username,
@@ -51,7 +51,7 @@ def register(request):
 
         token = generate_jwt_token(user)
 
-        response = JsonResponse({"message": "User registered successfully", "token": token})
+        response = JsonResponse({"message": "User berhasil terdaftar.", "token": token})
         response.set_cookie(
             'jwt_token', token,
             max_age=timedelta(days=1),
@@ -90,7 +90,7 @@ def login(request):
         password = data.get('password')
 
         if not username or not password:
-            return JsonResponse({"error": "username and password are required"}, status=400)
+            return JsonResponse({"error": "Username dan password diperlukan."}, status=400)
 
         user = Users.objects.filter(username=username).first()
 
@@ -100,7 +100,7 @@ def login(request):
         if check_password(password, user.password):
             token = generate_jwt_token(user)
 
-            response = JsonResponse({"message": "User logged in successfully", "token": token})
+            response = JsonResponse({"message": "User berhasil log in", "token": token})
             response.set_cookie(
                 'jwt_token', token,
                 max_age=timedelta(days=1),
@@ -111,13 +111,13 @@ def login(request):
 
             return response 
         else:
-            return JsonResponse({"error": "Invalid credentials"}, status=400)
+            return JsonResponse({"error": "Username dan/atau password tidak valid."}, status=400)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
     
 @require_http_methods(["POST"])
 def logout(request):
-    response = JsonResponse({"message": "Logged out successfully"})
+    response = JsonResponse({"message": "Berhasil log out."})
     response.delete_cookie('jwt_token')
     return response
